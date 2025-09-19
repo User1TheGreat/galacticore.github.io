@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en" class="bg-gray-950">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galactic Core 5.0</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/tone@14.9.11/build/Tone.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+        
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background: #0d1117;
+            color: #ffffff;
+            overflow-y: auto;
+            user-select: none;
+            cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffffff' d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15.5l-5-5 1.5-1.5 3.5 3.5 7.5-7.5 1.5 1.5-9 9z'/%3E%3C/svg%3E") 12 12, auto;
+        }
+
+        .star-field {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            background: radial-gradient(ellipse at center, #1b2735 0%, #090a0f 100%);
+        }
+
+        .star {
+            background: #ffffff;
+            border-radius: 50%;
+            position: absolute;
+            animation: twinkle linear infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.1; }
+            50% { opacity: 0.8; }
+        }
+        
+        /* Main core visual effects */
+        .click-area {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            cursor: pointer;
+            transition: transform 0.2s ease-in-out;
+            transform-style: preserve-3d;
+        }
+        
+        .click-area:hover {
+            transform: scale(1.05) rotateY(5deg);
+        }
+
+        .core {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0));
+            box-shadow: 0 0 50px #fff, 0 0 100px #fff, 0 0 150px #fff;
+            animation: pulse 4s infinite cubic-bezier(0.4, 0, 0.6, 1);
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            pointer-events: none;
+            animation: explode 0.8s forwards;
+            opacity: 0;
+        }
+
+        @keyframes explode {
+            from {
+                transform: scale(0.5);
+                opacity: 1;
+            }
+            to {
+                transform: scale(2) translate(-50%, -50%);
+                opacity: 0;
+            }
+        }
+
+        .floating-text {
+            position: absolute;
+            color: #ffff00;
+            font-weight: bold;
+            font-size: 1.5rem;
+            pointer-events: none;
+            animation: floatUpAndFade 1s ease-out forwards;
+        }
+
+        @keyframes floatUpAndFade {
+            from {
+                transform: translate(-50%, -50%);
+                opacity: 1;
+            }
+            to {
+                transform: translate(-50%, -150%);
+                opacity: 0;
+            }
+        }
+        
+        /* General UI components and animations */
+        .upgrade-card {
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+        }
+
+        .upgrade-card:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .buy-button {
+            transition: all 0.3s ease-in-out;
+        }
+
+        .buy-button:hover:not(:disabled) {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .buy-button:disabled {
+            background-color: #4b5563 !important;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+            opacity: 0.6;
+        }
+
+        .message-box {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #2d3748;
+            color: #a0aec0;
+            padding: 1rem 2rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+        }
+
+        .modal {
+            background-color: #1a202c;
+            border-radius: 1rem;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            background-color: #1f2937;
+            border-bottom: 3px solid #6366f1;
+            transform: translateY(-2px);
+        }
+        
+        .main-menu {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #0d1117;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .achievement-card {
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.3s ease-in-out;
+        }
+        .achievement-card.unlocked::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .achievement-card.unlocked:hover::before {
+            opacity: 1;
+        }
+        .achievement-card.unlocked .check-icon {
+            display: block;
+        }
+        .achievement-card:not(.unlocked) .check-icon {
+            display: none;
+        }
+
+        .check-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            color: #4CAF50;
+            animation: pulse 1s infinite;
+        }
+
+        .pulsing-effect {
+            animation: pulse-slow 5s infinite;
+        }
+
+        @keyframes pulse-slow {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .glow {
+            filter: drop-shadow(0 0 5px #00f) drop-shadow(0 0 10px #00f);
+        }
+
+        /* Custom scrollbar for a polished feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #6366f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4f46e5;
+        }
+    </style>
+</head>
+<body class="bg-gray-950 text-white flex flex-col items-center p-4">
+
+    <!-- Starfield Background -->
+    <div class="star-field" id="star-field"></div>
+
+    <!-- Message Box and Modal Container -->
+    <div class="message-box" id="message-box"></div>
+    <div id="modal-container" class="hidden"></div>
+
+    <!-- Main Menu -->
+    <div id="main-menu" class="main-menu">
+        <h1 class="text-6xl md:text-8xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-4 pulsing-effect">
+            Galactic Core
+        </h1>
+        <p class="text-xl md:text-2xl text-gray-400 mb-8 text-center animate-fade-in-up">Harvest energy, prestige, and sacrifice your way to cosmic power!</p>
+        <button id="start-game-button" class="buy-button px-12 py-6 rounded-full text-white font-bold text-2xl bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 transition-all duration-300 transform hover:scale-110">
+            Start Game
+        </button>
+    </div>
+
+    <!-- Main Game Container -->
+    <div id="game-container" class="hidden flex flex-col items-center space-y-8 max-w-5xl w-full">
+        <!-- Header -->
+        <header class="text-center mt-8">
+            <h1 class="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-2 glow">
+                Galactic Core
+            </h1>
+            <p class="text-lg md:text-xl text-gray-400">Harvest energy from the cosmic core!</p>
+        </header>
+        
+        <!-- Stats Display -->
+        <div class="flex flex-wrap items-center justify-center space-y-4 md:space-y-0 md:space-x-8 text-center md:text-left w-full">
+            <div class="bg-gray-800 rounded-xl p-4 md:p-6 w-full md:w-auto shadow-lg transform hover:scale-105 transition-transform duration-300">
+                <p class="text-gray-400 text-sm">Energy</p>
+                <p id="energy-display" class="text-3xl md:text-5xl font-bold mt-1 text-yellow-300">0</p>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-4 md:p-6 w-full md:w-auto shadow-lg transform hover:scale-105 transition-transform duration-300">
+                <p class="text-gray-400 text-sm">Energy per Second</p>
+                <p id="eps-display" class="text-3xl md:text-5xl font-bold mt-1 text-green-400">0</p>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-4 md:p-6 w-full md:w-auto shadow-lg transform hover:scale-105 transition-transform duration-300">
+                <p class="text-gray-400 text-sm">Prestige Power</p>
+                <p id="prestige-display" class="text-3xl md:text-5xl font-bold mt-1 text-cyan-400">0</p>
+            </div>
+            <div class="bg-gray-800 rounded-xl p-4 md:p-6 w-full md:w-auto shadow-lg transform hover:scale-105 transition-transform duration-300">
+                <p class="text-gray-400 text-sm">Stellar Dust</p>
+                <p id="dust-display" class="text-3xl md:text-5xl font-bold mt-1 text-fuchsia-400">0</p>
+            </div>
+        </div>
+
+        <!-- The Clickable Area -->
+        <div class="relative flex items-center justify-center my-8">
+            <div id="click-area" class="click-area rounded-full p-4 md:p-6 bg-gradient-to-br from-blue-500 to-purple-600 shadow-xl border-4 border-blue-400">
+                <div class="core"></div>
+            </div>
+        </div>
+        
+        <!-- Navigation Tabs -->
+        <div class="flex justify-center w-full mb-4 overflow-x-auto">
+            <button id="upgrades-tab" class="tab-button px-6 py-3 mx-2 rounded-t-xl text-lg font-bold bg-gray-800 active whitespace-nowrap">Upgrades</button>
+            <button id="achievements-tab" class="tab-button px-6 py-3 mx-2 rounded-t-xl text-lg font-bold bg-gray-800 whitespace-nowrap">Achievements</button>
+            <button id="sacrifice-tab" class="tab-button px-6 py-3 mx-2 rounded-t-xl text-lg font-bold bg-gray-800 whitespace-nowrap">Sacrifice</button>
+            <button id="settings-tab" class="tab-button px-6 py-3 mx-2 rounded-t-xl text-lg font-bold bg-gray-800 whitespace-nowrap">Settings</button>
+        </div>
+
+        <!-- Content Sections -->
+        <div id="upgrades-section" class="content-section bg-gray-800 rounded-2xl p-6 w-full shadow-lg">
+            <h2 class="text-2xl font-bold mb-4 text-center">Upgrades</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Upgrade 1: Fusion Amplifiers -->
+                <div class="upgrade-card bg-gray-700 p-4 rounded-xl flex flex-col items-center space-y-2">
+                    <h3 class="text-lg font-semibold text-blue-300">Fusion Amplifiers</h3>
+                    <p class="text-sm text-gray-400 text-center">Increases energy per click.</p>
+                    <div class="flex items-center space-x-2">
+                        <span id="amp-count" class="text-lg font-bold">0</span>
+                        <span class="text-gray-500">owned</span>
+                    </div>
+                    <button id="buy-amp" class="buy-button mt-2 px-6 py-2 rounded-full text-white font-bold bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        Buy for <span id="amp-cost">10</span>
+                    </button>
+                </div>
+
+                <!-- Upgrade 2: Quantum Harvesters -->
+                <div class="upgrade-card bg-gray-700 p-4 rounded-xl flex flex-col items-center space-y-2">
+                    <h3 class="text-lg font-semibold text-green-300">Quantum Harvesters</h3>
+                    <p class="text-sm text-gray-400 text-center">Increases energy per second.</p>
+                    <div class="flex items-center space-x-2">
+                        <span id="harvester-count" class="text-lg font-bold">0</span>
+                        <span class="text-gray-500">owned</span>
+                    </div>
+                    <button id="buy-harvester" class="buy-button mt-2 px-6 py-2 rounded-full text-white font-bold bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400">
+                        Buy for <span id="harvester-cost">100</span>
+                    </button>
+                </div>
+                
+                <!-- Upgrade 3: Dark Matter Generators -->
+                <div class="upgrade-card bg-gray-700 p-4 rounded-xl flex flex-col items-center space-y-2">
+                    <h3 class="text-lg font-semibold text-purple-300">Dark Matter Generators</h3>
+                    <p class="text-sm text-gray-400 text-center">Massively boosts all income.</p>
+                    <div class="flex items-center space-x-2">
+                        <span id="generator-count" class="text-lg font-bold">0</span>
+                        <span class="text-gray-500">owned</span>
+                    </div>
+                    <button id="buy-generator" class="buy-button mt-2 px-6 py-2 rounded-full text-white font-bold bg-purple-500 hover:bg-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-400">
+                        Buy for <span id="generator-cost">1000</span>
+                    </button>
+                </div>
+                
+                <!-- NEW: Galactic Forges -->
+                <div class="upgrade-card bg-gray-700 p-4 rounded-xl flex flex-col items-center space-y-2">
+                    <h3 class="text-lg font-semibold text-orange-300">Galactic Forges</h3>
+                    <p class="text-sm text-gray-400 text-center">Creates new cores that double income.</p>
+                    <div class="flex items-center space-x-2">
+                        <span id="forge-count" class="text-lg font-bold">0</span>
+                        <span class="text-gray-500">owned</span>
+                    </div>
+                    <button id="buy-forge" class="buy-button mt-2 px-6 py-2 rounded-full text-white font-bold bg-orange-500 hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-400">
+                        Buy for <span id="forge-cost">10000</span>
+                    </button>
+                </div>
+                
+                 <!-- NEW: Interstellar Hubs -->
+                <div class="upgrade-card bg-gray-700 p-4 rounded-xl flex flex-col items-center space-y-2">
+                    <h3 class="text-lg font-semibold text-indigo-300">Interstellar Hubs</h3>
+                    <p class="text-sm text-gray-400 text-center">Boosts income based on all other upgrades.</p>
+                    <div class="flex items-center space-x-2">
+                        <span id="hub-count" class="text-lg font-bold">0</span>
+                        <span class="text-gray-500">owned</span>
+                    </div>
+                    <button id="buy-hub" class="buy-button mt-2 px-6 py-2 rounded-full text-white font-bold bg-indigo-500 hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                        Buy for <span id="hub-cost">100000</span>
+                    </button>
+                </div>
+                
+                <!-- Prestige Button (Now in Upgrades tab) -->
+                <div class="upgrade-card bg-gray-700 p-4 rounded-xl flex flex-col items-center space-y-2">
+                    <h3 class="text-lg font-semibold text-cyan-300">Cosmic Reset</h3>
+                    <p class="text-sm text-gray-400 text-center">Reset everything for Prestige Power.</p>
+                    <div class="flex items-center space-x-2">
+                        <span id="prestige-power-gain" class="text-lg font-bold">0</span>
+                        <span class="text-gray-500">gain</span>
+                    </div>
+                    <button id="prestige-button" class="buy-button mt-2 px-6 py-2 rounded-full text-white font-bold bg-cyan-500 hover:bg-cyan-600 focus:outline-none focus:ring-2 focus:ring-cyan-400">
+                        Prestige
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="achievements-section" class="content-section bg-gray-800 rounded-2xl p-6 w-full shadow-lg hidden">
+            <h2 class="text-2xl font-bold mb-4 text-center">Achievements</h2>
+            <div id="achievements-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Achievements will be dynamically added here -->
+            </div>
+        </div>
+        
+        <div id="sacrifice-section" class="content-section bg-gray-800 rounded-2xl p-6 w-full shadow-lg hidden">
+            <h2 class="text-2xl font-bold mb-4 text-center">Cosmic Sacrifice</h2>
+            <p class="text-lg text-gray-400 mb-4">Sacrifice all your progress and prestige power to gain **Stellar Dust**, which gives a permanent multiplier to all future games.</p>
+            <div class="flex flex-col items-center space-y-4">
+                <p class="text-xl font-bold text-fuchsia-300">Stellar Dust Gain: <span id="dust-gain">0</span></p>
+                <button id="sacrifice-button" class="buy-button px-8 py-4 rounded-full text-white font-bold bg-fuchsia-500 hover:bg-fuchsia-600 focus:outline-none focus:ring-2 focus:ring-fuchsia-400">
+                    Perform Sacrifice
+                </button>
+            </div>
+        </div>
+
+        <div id="settings-section" class="content-section bg-gray-800 rounded-2xl p-6 w-full shadow-lg hidden">
+            <h2 class="text-2xl font-bold mb-4 text-center">Settings</h2>
+            <div class="flex flex-col space-y-4 items-center">
+                <div class="flex items-center justify-between w-full p-2 bg-gray-700 rounded-md">
+                    <span class="text-lg text-gray-400">Music</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="music-toggle" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+                <div class="flex items-center justify-between w-full p-2 bg-gray-700 rounded-md">
+                    <span class="text-lg text-gray-400">Sound Effects</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="sfx-toggle" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+                <div class="flex items-center justify-between w-full p-2 bg-gray-700 rounded-md">
+                    <span class="text-lg text-gray-400">Number Formatting</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="format-toggle" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+                <div class="flex items-center justify-between w-full p-2 bg-gray-700 rounded-md">
+                    <span class="text-lg text-gray-400">Confirm Resets</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="confirm-toggle" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+                 <div class="flex items-center justify-between w-full p-2 bg-gray-700 rounded-md">
+                    <span class="text-lg text-gray-400">UI Animations</span>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="animation-toggle" class="sr-only peer" checked>
+                        <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-600 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                    </label>
+                </div>
+                <div class="flex flex-col space-y-2 w-full mt-4">
+                    <button id="save-game" class="px-6 py-2 rounded-full text-white font-bold bg-gray-600 hover:bg-gray-700 transition-colors duration-300">
+                        Save Game
+                    </button>
+                    <button id="load-game" class="px-6 py-2 rounded-full text-white font-bold bg-gray-600 hover:bg-gray-700 transition-colors duration-300">
+                        Load Game
+                    </button>
+                    <button id="full-reset-button" class="px-6 py-2 rounded-full text-white font-bold bg-red-600 hover:bg-red-700 transition-colors duration-300">
+                        Full Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game State Variables
+        let energy = 0;
+        let energyPerClick = 1;
+        let energyPerSecond = 0;
+        let prestigePower = 0;
+        let stellarDust = 0;
+        let lastSaveTime = Date.now();
+        let musicEnabled = true;
+        let sfxEnabled = true;
+        let fullNumberFormat = false;
+        let confirmResets = true;
+        let animationsEnabled = true;
+
+        // Upgrade State
+        const upgrades = {
+            amplifier: {
+                name: "Fusion Amplifiers",
+                count: 0,
+                cost: 10,
+                baseCost: 10,
+                multiplier: 1.5,
+                effect: { click: 1 }
+            },
+            harvester: {
+                name: "Quantum Harvesters",
+                count: 0,
+                cost: 100,
+                baseCost: 100,
+                multiplier: 1.75,
+                effect: { passive: 1 }
+            },
+            generator: {
+                name: "Dark Matter Generators",
+                count: 0,
+                cost: 1000,
+                baseCost: 1000,
+                multiplier: 2.0,
+                effect: { all: 2 }
+            },
+            forge: {
+                name: "Galactic Forges",
+                count: 0,
+                cost: 10000,
+                baseCost: 10000,
+                multiplier: 3.0,
+                effect: { multiplier: 2 }
+            },
+            hub: {
+                name: "Interstellar Hubs",
+                count: 0,
+                cost: 100000,
+                baseCost: 100000,
+                multiplier: 4.0,
+                effect: { multiplier: 0 } // Calculated dynamically
+            }
+        };
+
+        // Achievement State - Over 50 Achievements for maximum flex!
+        const achievements = {
+            // General Milestones
+            firstSpark: { name: "First Spark", description: "Click the Core for the first time.", achieved: false, check: () => clickCount >= 1 },
+            rapidTapper: { name: "Rapid Tapper", description: "Click the Core 10 times.", achieved: false, check: () => clickCount >= 10 },
+            clickMaster: { name: "Click Master", description: "Click the Core 1,000 times.", achieved: false, check: () => clickCount >= 1000 },
+            clickTyrant: { name: "Click Tyrant", description: "Click the Core 10,000 times.", achieved: false, check: () => clickCount >= 10000 },
+            cosmicFinger: { name: "Cosmic Finger", description: "Click the Core 1,000,000 times.", achieved: false, check: () => clickCount >= 1000000 },
+            energyHoarder: { name: "Energy Hoarder", description: "Accumulate 100 total energy.", achieved: false, check: () => energy >= 100 },
+            energyTycoon: { name: "Energy Tycoon", description: "Accumulate 1,000,000 total energy.", achieved: false, check: () => energy >= 1e6 },
+            energyGod: { name: "Energy God", description: "Accumulate 1e12 total energy.", achieved: false, check: () => energy >= 1e12 },
+            galacticEmpire: { name: "Galactic Empire", description: "Accumulate 1e18 total energy.", achieved: false, check: () => energy >= 1e18 },
+            beyondInfinity: { name: "Beyond Infinity", description: "Accumulate 1e30 total energy.", achieved: false, check: () => energy >= 1e30 },
+            
+            // Upgrade Milestones
+            firstAmplifier: { name: "Amplified", description: "Buy your first Fusion Amplifier.", achieved: false, check: () => upgrades.amplifier.count >= 1 },
+            tenAmplifiers: { name: "Amplify Power", description: "Own 10 Fusion Amplifiers.", achieved: false, check: () => upgrades.amplifier.count >= 10 },
+            centuryAmplifiers: { name: "Amplifier Century", description: "Own 100 Fusion Amplifiers.", achieved: false, check: () => upgrades.amplifier.count >= 100 },
+            firstHarvester: { name: "Quantum Leap", description: "Buy your first Quantum Harvester.", achieved: false, check: () => upgrades.harvester.count >= 1 },
+            tenHarvesters: { name: "Harvesting Fields", description: "Own 10 Quantum Harvesters.", achieved: false, check: () => upgrades.harvester.count >= 10 },
+            centuryHarvesters: { name: "Harvester Century", description: "Own 100 Quantum Harvesters.", achieved: false, check: () => upgrades.harvester.count >= 100 },
+            firstGenerator: { name: "Dark Power", description: "Buy your first Dark Matter Generator.", achieved: false, check: () => upgrades.generator.count >= 1 },
+            tenGenerators: { name: "Generator Farm", description: "Own 10 Dark Matter Generators.", achieved: false, check: () => upgrades.generator.count >= 10 },
+            centuryGenerators: { name: "Generator Century", description: "Own 100 Dark Matter Generators.", achieved: false, check: () => upgrades.generator.count >= 100 },
+            firstForge: { name: "Stellar Forge", description: "Buy your first Galactic Forge.", achieved: false, check: () => upgrades.forge.count >= 1 },
+            tenForges: { name: "Forge Assembly", description: "Own 10 Galactic Forges.", achieved: false, check: () => upgrades.forge.count >= 10 },
+            firstHub: { name: "The Nexus", description: "Buy your first Interstellar Hub.", achieved: false, check: () => upgrades.hub.count >= 1 },
+            
+            // Combined Upgrades
+            upgradeSynergy: { name: "Upgrade Synergy", description: "Own at least one of every upgrade.", achieved: false, check: () => upgrades.amplifier.count >= 1 && upgrades.harvester.count >= 1 && upgrades.generator.count >= 1 && upgrades.forge.count >= 1 && upgrades.hub.count >= 1 },
+            masterCollector: { name: "Master Collector", description: "Own 10 of every upgrade type.", achieved: false, check: () => upgrades.amplifier.count >= 10 && upgrades.harvester.count >= 10 && upgrades.generator.count >= 10 && upgrades.forge.count >= 10 && upgrades.hub.count >= 10 },
+
+            // Prestige Milestones
+            firstPrestige: { name: "New Beginnings", description: "Perform your first Cosmic Reset.", achieved: false, check: () => prestigePower >= 1 },
+            tenPrestige: { name: "Cosmic Traveler", description: "Have 10 Prestige Power.", achieved: false, check: () => prestigePower >= 10 },
+            prestigeMaster: { name: "Prestige Master", description: "Have 100 Prestige Power.", achieved: false, check: () => prestigePower >= 100 },
+            prestigeGod: { name: "Prestige God", description: "Have 1,000 Prestige Power.", achieved: false, check: () => prestigePower >= 1000 },
+            cosmicConqueror: { name: "Cosmic Conqueror", description: "Have 10,000 Prestige Power.", achieved: false, check: () => prestigePower >= 10000 },
+            
+            // Sacrifice Milestones
+            firstSacrifice: { name: "Stellar Rebirth", description: "Perform your first Cosmic Sacrifice.", achieved: false, check: () => stellarDust >= 1 },
+            tenDust: { name: "Dust Gatherer", description: "Have 10 Stellar Dust.", achieved: false, check: () => stellarDust >= 10 },
+            oneHundredDust: { name: "Dust Master", description: "Have 100 Stellar Dust.", achieved: false, check: () => stellarDust >= 100 },
+            dustGod: { name: "Dust God", description: "Have 1,000 Stellar Dust.", achieved: false, check: () => stellarDust >= 1000 },
+            
+            // Speedrun achievements
+            speedrun1: { name: "Quick Start", description: "Reach 1,000 energy within 1 minute.", achieved: false, check: () => energy >= 1000 && (Date.now() - gameStartTime) <= 60000 },
+            speedrun2: { name: "Fast Paced", description: "Reach 1,000,000 energy within 10 minutes.", achieved: false, check: () => energy >= 1e6 && (Date.now() - gameStartTime) <= 600000 },
+
+            // Hidden/Secret achievements (triggers not revealed)
+            secret1: { name: "What Was That?", description: "Discover a secret interaction.", achieved: false, check: () => false }, // Placeholder for future feature
+            secret2: { name: "A Glimpse of the Void", description: "Witness the core's true form.", achieved: false, check: () => false }, // Placeholder for future feature
+        };
+        let clickCount = 0;
+        let gameStartTime = Date.now();
+
+        // Audio Setup
+        let clickSynth = null;
+        let upgradeSynth = null;
+        let bgm = null;
+
+        function initializeAudio() {
+             // Create a simple synth for click sound
+            clickSynth = new Tone.Synth({
+                oscillator: { type: "triangle" },
+                envelope: {
+                    attack: 0.005,
+                    decay: 0.1,
+                    sustain: 0,
+                    release: 0.1
+                }
+            }).toDestination();
+            
+            // Create a synth for upgrade sound
+            upgradeSynth = new Tone.MembraneSynth({
+                envelope: {
+                    attack: 0.001,
+                    decay: 0.4,
+                    sustain: 0,
+                    release: 0.4
+                }
+            }).toDestination();
+            
+            // Create a simple background music loop
+            bgm = new Tone.Loop(time => {
+                const note = `C${Math.floor(Math.random() * 2) + 2}`;
+                clickSynth.triggerAttackRelease(note, "2n", time);
+            }, "2n").start(0);
+            
+            bgm.volume.value = -12; // Lower volume of BGM
+            Tone.Transport.start();
+            bgm.mute = !musicEnabled;
+        }
+
+        // DOM elements
+        const energyDisplay = document.getElementById('energy-display');
+        const epsDisplay = document.getElementById('eps-display');
+        const prestigeDisplay = document.getElementById('prestige-display');
+        const dustDisplay = document.getElementById('dust-display');
+        const clickArea = document.getElementById('click-area');
+        const buyAmpBtn = document.getElementById('buy-amp');
+        const ampCostSpan = document.getElementById('amp-cost');
+        const ampCountSpan = document.getElementById('amp-count');
+        const buyHarvesterBtn = document.getElementById('buy-harvester');
+        const harvesterCostSpan = document.getElementById('harvester-cost');
+        const harvesterCountSpan = document.getElementById('harvester-count');
+        const buyGeneratorBtn = document.getElementById('buy-generator');
+        const generatorCostSpan = document.getElementById('generator-cost');
+        const generatorCountSpan = document.getElementById('generator-count');
+        const buyForgeBtn = document.getElementById('buy-forge');
+        const forgeCostSpan = document.getElementById('forge-cost');
+        const forgeCountSpan = document.getElementById('forge-count');
+        const buyHubBtn = document.getElementById('buy-hub');
+        const hubCostSpan = document.getElementById('hub-cost');
+        const hubCountSpan = document.getElementById('hub-count');
+        const prestigeBtn = document.getElementById('prestige-button');
+        const prestigeGainSpan = document.getElementById('prestige-power-gain');
+        const sacrificeBtn = document.getElementById('sacrifice-button');
+        const dustGainSpan = document.getElementById('dust-gain');
+        const saveBtn = document.getElementById('save-game');
+        const loadBtn = document.getElementById('load-game');
+        const fullResetBtn = document.getElementById('full-reset-button');
+        const messageBox = document.getElementById('message-box');
+        const modalContainer = document.getElementById('modal-container');
+        const starField = document.getElementById('star-field');
+        const achievementsContainer = document.getElementById('achievements-container');
+        const musicToggle = document.getElementById('music-toggle');
+        const sfxToggle = document.getElementById('sfx-toggle');
+        const formatToggle = document.getElementById('format-toggle');
+        const confirmToggle = document.getElementById('confirm-toggle');
+        const animationToggle = document.getElementById('animation-toggle');
+        const mainMenu = document.getElementById('main-menu');
+        const gameContainer = document.getElementById('game-container');
+        const startGameButton = document.getElementById('start-game-button');
+
+        const tabs = {
+            'upgrades': document.getElementById('upgrades-section'),
+            'achievements': document.getElementById('achievements-section'),
+            'sacrifice': document.getElementById('sacrifice-section'),
+            'settings': document.getElementById('settings-section')
+        };
+        const tabButtons = {
+            'upgrades': document.getElementById('upgrades-tab'),
+            'achievements': document.getElementById('achievements-tab'),
+            'sacrifice': document.getElementById('sacrifice-tab'),
+            'settings': document.getElementById('settings-tab')
+        };
+
+
+        // --- Core Game Logic Functions ---
+        
+        // FIX: Added the missing function to increment energy.
+        function addEnergy(amount, x, y) {
+            energy += amount;
+            if (animationsEnabled) {
+                // Add an offset to position the floating text correctly
+                const rect = clickArea.getBoundingClientRect();
+                createParticleEffect(x, y, `+${formatNumber(amount)}`);
+            }
+        }
+
+        /**
+         * Recalculates all derived stats.
+         */
+        function recalculateStats() {
+            let totalPassive = 0;
+            totalPassive += upgrades.harvester.count * upgrades.harvester.effect.passive;
+            
+            let totalClick = 1;
+            totalClick += upgrades.amplifier.count * upgrades.amplifier.effect.click;
+
+            const totalUpgrades = upgrades.amplifier.count + upgrades.harvester.count + upgrades.generator.count + upgrades.forge.count;
+            upgrades.hub.effect.multiplier = Math.pow(1.1, totalUpgrades);
+            
+            let globalMultiplier = 1;
+            globalMultiplier *= Math.pow(upgrades.generator.effect.all, upgrades.generator.count);
+            globalMultiplier *= Math.pow(upgrades.forge.effect.multiplier, upgrades.forge.count);
+            globalMultiplier *= Math.pow(upgrades.hub.effect.multiplier, upgrades.hub.count);
+            globalMultiplier *= (1 + prestigePower / 10);
+            globalMultiplier *= (1 + stellarDust / 2);
+
+            energyPerClick = totalClick * globalMultiplier;
+            energyPerSecond = totalPassive * globalMultiplier;
+        }
+
+
+        /**
+         * Updates the UI to reflect the current game state.
+         */
+        function updateUI() {
+            energyDisplay.textContent = formatNumber(energy);
+            epsDisplay.textContent = formatNumber(energyPerSecond);
+            prestigeDisplay.textContent = formatNumber(prestigePower);
+            dustDisplay.textContent = formatNumber(stellarDust);
+
+            ampCostSpan.textContent = formatNumber(upgrades.amplifier.cost);
+            ampCountSpan.textContent = upgrades.amplifier.count;
+            harvesterCostSpan.textContent = formatNumber(upgrades.harvester.cost);
+            harvesterCountSpan.textContent = upgrades.harvester.count;
+            generatorCostSpan.textContent = formatNumber(upgrades.generator.cost);
+            generatorCountSpan.textContent = upgrades.generator.count;
+            forgeCostSpan.textContent = formatNumber(upgrades.forge.cost);
+            forgeCountSpan.textContent = upgrades.forge.count;
+            hubCostSpan.textContent = formatNumber(upgrades.hub.cost);
+            hubCountSpan.textContent = upgrades.hub.count;
+            
+            const prestigeGain = Math.floor(Math.sqrt(energy / 10000));
+            prestigeGainSpan.textContent = prestigeGain;
+            prestigeBtn.disabled = prestigeGain < 1;
+            
+            const dustGain = Math.floor(prestigePower / 100);
+            dustGainSpan.textContent = dustGain;
+            sacrificeBtn.disabled = dustGain < 1;
+
+            buyAmpBtn.disabled = energy < upgrades.amplifier.cost;
+            buyHarvesterBtn.disabled = energy < upgrades.harvester.cost;
+            buyGeneratorBtn.disabled = energy < upgrades.generator.cost;
+            buyForgeBtn.disabled = energy < upgrades.forge.cost;
+            buyHubBtn.disabled = energy < upgrades.hub.cost;
+
+            updateAchievementsUI();
+        }
+
+        /**
+         * Handles the main click event on the core.
+         * @param {MouseEvent} event The click event.
+         */
+        function handleCoreClick(event) {
+            addEnergy(energyPerClick, event.offsetX, event.offsetY);
+            clickCount++;
+            checkAllAchievements();
+            
+            if (sfxEnabled && clickSynth) {
+                clickSynth.triggerAttackRelease("C3", "8n");
+            }
+        }
+
+        /**
+         * Handles the purchase of an upgrade.
+         * @param {string} type The type of upgrade to buy.
+         */
+        function buyUpgrade(type) {
+            const upgrade = upgrades[type];
+            if (energy >= upgrade.cost) {
+                energy -= upgrade.cost;
+                upgrade.count++;
+                upgrade.cost = Math.round(upgrade.baseCost * Math.pow(upgrade.multiplier, upgrade.count));
+                recalculateStats();
+                showMessage(`${upgrade.name} purchased!`);
+
+                if (sfxEnabled && upgradeSynth) {
+                    upgradeSynth.triggerAttackRelease("C2", "8n");
+                }
+            } else {
+                showMessage("Not enough energy!", true);
+            }
+            updateUI();
+            saveGame();
+            checkAllAchievements();
+        }
+
+        /**
+         * Implements the prestige system. Resets progress for prestige power.
+         */
+        function cosmicReset() {
+            const prestigeGain = Math.floor(Math.sqrt(energy / 10000));
+            if (prestigeGain > 0) {
+                const resetFunction = () => {
+                    prestigePower += prestigeGain;
+                    resetGame();
+                    showMessage(`Cosmic Reset complete! Gained ${prestigeGain} Prestige Power!`);
+                    updateUI();
+                    saveGame();
+                    checkAllAchievements();
+                };
+
+                if (confirmResets) {
+                    showModal('Confirm Cosmic Reset', `Are you sure you want to reset for ${prestigeGain} Prestige Power?`, resetFunction);
+                } else {
+                    resetFunction();
+                }
+            } else {
+                showMessage("Not enough energy for a Cosmic Reset.", true);
+            }
+        }
+        
+        /**
+         * Implements the sacrifice system. Resets everything for stellar dust.
+         */
+        function performSacrifice() {
+            const dustGain = Math.floor(prestigePower / 100);
+            if (dustGain > 0) {
+                const sacrificeFunction = () => {
+                    stellarDust += dustGain;
+                    resetGame();
+                    prestigePower = 0;
+                    showMessage(`Cosmic Sacrifice complete! Gained ${dustGain} Stellar Dust!`);
+                    updateUI();
+                    saveGame();
+                    checkAllAchievements();
+                };
+                
+                if (confirmResets) {
+                    showModal('Confirm Cosmic Sacrifice', `Are you sure you want to sacrifice for ${dustGain} Stellar Dust?`, sacrificeFunction);
+                } else {
+                    sacrificeFunction();
+                }
+            } else {
+                showMessage("Not enough Prestige Power for a Sacrifice.", true);
+            }
+        }
+        
+        /**
+         * Resets the game state to its initial values.
+         */
+        function resetGame() {
+            energy = 0;
+            energyPerClick = 1;
+            energyPerSecond = 0;
+            clickCount = 0;
+            gameStartTime = Date.now();
+            
+            // Reset upgrades
+            for (const key in upgrades) {
+                upgrades[key].count = 0;
+                upgrades[key].cost = upgrades[key].baseCost;
+            }
+            recalculateStats();
+        }
+
+        /**
+         * Performs a full game reset, wiping all progress.
+         */
+        function fullReset() {
+            const resetFunction = () => {
+                resetGame();
+                prestigePower = 0;
+                stellarDust = 0;
+                
+                for (const key in achievements) {
+                    achievements[key].achieved = false;
+                }
+                
+                saveGame();
+                updateUI();
+                showMessage("Game fully reset. All progress wiped.", false);
+            };
+            
+            showModal(
+                'Full Game Reset', 
+                'Are you sure you want to completely reset your game? This will wipe all energy, upgrades, prestige, and stellar dust. This cannot be undone.', 
+                resetFunction, 
+                true
+            );
+        }
+
+        // --- Visual & Utility Functions ---
+
+        /**
+         * Creates a visual particle and floating text effect on click.
+         * @param {number} x The x-coordinate of the click.
+         * @param {number} y The y-coordinate of the click.
+         * @param {string} text The text to display.
+         */
+        function createParticleEffect(x, y, text) {
+            if (!animationsEnabled) return;
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            const size = Math.random() * 10 + 5;
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
+            
+            particle.style.left = `${x}px`;
+            particle.style.top = `${y}px`;
+
+            const floatingText = document.createElement('div');
+            floatingText.classList.add('floating-text');
+            floatingText.textContent = text;
+            floatingText.style.left = `${x}px`;
+            floatingText.style.top = `${y}px`;
+
+            clickArea.appendChild(particle);
+            clickArea.appendChild(floatingText);
+
+            setTimeout(() => particle.remove(), 800);
+            setTimeout(() => floatingText.remove(), 1000);
+        }
+
+        /**
+         * Creates a star field background with animated twinkling stars.
+         * @param {number} count The number of stars to generate.
+         */
+        function createStarField(count) {
+            for (let i = 0; i < count; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                const size = Math.random() * 2;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                star.style.animationDuration = `${Math.random() * 3 + 2}s`;
+                starField.appendChild(star);
+            }
+        }
+
+        /**
+         * Formats a number with commas and suffixes for readability.
+         * @param {number} num The number to format.
+         * @returns {string} The formatted number string.
+         */
+        function formatNumber(num) {
+            if (!fullNumberFormat) {
+                const suffixes = ["", "K", "M", "B", "T", "Qa", "Qi", "Sx", "Sp", "Oc", "No", "De"];
+                if (num === 0) return "0";
+                const numAbs = Math.abs(num);
+                const tier = Math.floor(Math.log10(numAbs) / 3);
+                const suffix = suffixes[tier] || "";
+                const scaled = numAbs / Math.pow(1000, tier);
+                return (scaled.toFixed(2).replace(/\.0+$/, '') + suffix);
+            } else {
+                return num.toLocaleString();
+            }
+        }
+
+        /**
+         * Displays a temporary message box.
+         * @param {string} message The message to display.
+         * @param {boolean} isError If true, shows a red background.
+         */
+        function showMessage(message, isError = false) {
+            messageBox.textContent = message;
+            messageBox.style.opacity = '1';
+            messageBox.style.backgroundColor = isError ? '#dc2626' : '#2d3748';
+            setTimeout(() => {
+                messageBox.style.opacity = '0';
+            }, 2000);
+        }
+
+        /**
+         * Creates and shows a confirmation modal.
+         * @param {string} title The modal title.
+         * @param {string} message The modal message.
+         * @param {Function} onConfirm The function to call on confirmation.
+         * @param {boolean} isDestructive If true, shows a red confirm button.
+         */
+        function showModal(title, message, onConfirm, isDestructive = false) {
+            modalContainer.classList.remove('hidden');
+            modalContainer.innerHTML = `
+                <div class="modal">
+                    <h3 class="text-2xl font-bold mb-4">${title}</h3>
+                    <p class="text-gray-400 mb-6">${message}</p>
+                    <div class="flex justify-center space-x-4">
+                        <button id="modal-cancel" class="px-6 py-2 rounded-full text-white font-bold bg-gray-600 hover:bg-gray-700 transition-colors duration-300">
+                            Cancel
+                        </button>
+                        <button id="modal-confirm" class="px-6 py-2 rounded-full text-white font-bold ${isDestructive ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'} transition-colors duration-300">
+                            Confirm
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('modal-cancel').addEventListener('click', () => {
+                modalContainer.classList.add('hidden');
+            });
+            
+            document.getElementById('modal-confirm').addEventListener('click', () => {
+                onConfirm();
+                modalContainer.classList.add('hidden');
+            });
+        }
+
+        // --- Save/Load & Persistence ---
+
+        /**
+         * Saves the current game state to localStorage.
+         */
+        function saveGame() {
+            lastSaveTime = Date.now();
+            const gameState = {
+                energy,
+                energyPerClick,
+                energyPerSecond,
+                prestigePower,
+                stellarDust,
+                lastSaveTime,
+                upgrades,
+                achievements: Object.keys(achievements).reduce((obj, key) => {
+                    obj[key] = { achieved: achievements[key].achieved };
+                    return obj;
+                }, {}),
+                clickCount,
+                gameStartTime,
+                musicEnabled,
+                sfxEnabled,
+                fullNumberFormat,
+                confirmResets,
+                animationsEnabled,
+            };
+            localStorage.setItem('galacticClickerSave', JSON.stringify(gameState));
+            showMessage("Game Saved!");
+        }
+
+        /**
+         * Loads the game state from localStorage.
+         */
+        function loadGame() {
+            const savedState = localStorage.getItem('galacticClickerSave');
+            if (savedState) {
+                const gameState = JSON.parse(savedState);
+                energy = gameState.energy;
+                energyPerClick = gameState.energyPerClick;
+                energyPerSecond = gameState.energyPerSecond;
+                prestigePower = gameState.prestigePower;
+                stellarDust = gameState.stellarDust;
+                clickCount = gameState.clickCount;
+                gameStartTime = gameState.gameStartTime || Date.now();
+                musicEnabled = gameState.musicEnabled;
+                sfxEnabled = gameState.sfxEnabled;
+                
+                // FIX: Corrected boolean logic for number formatting
+                fullNumberFormat = gameState.fullNumberFormat ?? false;
+                confirmResets = gameState.confirmResets ?? true;
+                animationsEnabled = gameState.animationsEnabled ?? true;
+                
+                // Deep copy to prevent reference issues
+                for (const key in upgrades) {
+                     if (gameState.upgrades && gameState.upgrades[key]) {
+                        upgrades[key].count = gameState.upgrades[key].count;
+                        upgrades[key].cost = gameState.upgrades[key].cost;
+                     }
+                }
+                
+                // Load achievements
+                for (const key in achievements) {
+                    if (gameState.achievements && gameState.achievements[key]) {
+                        achievements[key].achieved = gameState.achievements[key].achieved;
+                    }
+                }
+                
+                // FIX: Moved recalculateStats() to be before offline gain calculation
+                recalculateStats();
+
+                // Calculate offline gains
+                const now = Date.now();
+                const timePassed = now - gameState.lastSaveTime;
+                const offlineEnergy = Math.floor(energyPerSecond * (timePassed / 1000));
+                energy += offlineEnergy;
+                if (offlineEnergy > 0) {
+                    showMessage(`You were away for ${Math.floor(timePassed / 1000)} seconds and earned ${formatNumber(offlineEnergy)} energy!`);
+                }
+                lastSaveTime = now;
+                
+                // Update toggles
+                musicToggle.checked = musicEnabled;
+                sfxToggle.checked = sfxEnabled;
+                // FIX: Inverted logic to match `fullNumberFormat` variable
+                formatToggle.checked = !fullNumberFormat; 
+                confirmToggle.checked = confirmResets;
+                animationToggle.checked = animationsEnabled;
+                bgm.mute = !musicEnabled;
+                
+                updateUI();
+                showMessage("Game Loaded!");
+            } else {
+                showMessage("No saved game found.", true);
+            }
+        }
+        
+        // --- Achievement System ---
+        function checkAllAchievements() {
+            for (const key in achievements) {
+                if (!achievements[key].achieved) {
+                    if (achievements[key].check()) {
+                        unlockAchievement(key);
+                    }
+                }
+            }
+        }
+
+        function unlockAchievement(id) {
+            achievements[id].achieved = true;
+            showMessage(`Achievement Unlocked: ${achievements[id].name}!`, false);
+            updateAchievementsUI();
+            saveGame();
+        }
+
+        function updateAchievementsUI() {
+            achievementsContainer.innerHTML = '';
+            for (const key in achievements) {
+                const achievement = achievements[key];
+                const card = document.createElement('div');
+                card.classList.add(
+                    'bg-gray-700', 'p-4', 'rounded-xl', 'flex', 'flex-col', 'items-center', 'space-y-2', 'achievement-card'
+                );
+                if (achievement.achieved) {
+                    card.classList.add('unlocked');
+                }
+                
+                const title = document.createElement('h3');
+                title.classList.add('text-lg', 'font-semibold', 'text-yellow-200');
+                title.textContent = achievement.name;
+                
+                const description = document.createElement('p');
+                description.classList.add('text-sm', 'text-gray-400', 'text-center');
+                description.textContent = achievement.description;
+                
+                const status = document.createElement('div');
+                if (achievement.achieved) {
+                    status.innerHTML = '<span class="text-green-500">Unlocked!</span>';
+                } else {
+                    status.innerHTML = '<span class="text-red-500">Locked</span>';
+                }
+
+                const checkIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                checkIcon.setAttribute("class", "check-icon");
+                checkIcon.setAttribute("width", "24");
+                checkIcon.setAttribute("height", "24");
+                checkIcon.setAttribute("viewBox", "0 0 24 24");
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("fill", "currentColor");
+                path.setAttribute("d", "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15.5l-5-5 1.5-1.5 3.5 3.5 7.5-7.5 1.5 1.5-9 9z");
+                checkIcon.appendChild(path);
+
+                card.appendChild(checkIcon);
+                card.appendChild(title);
+                card.appendChild(description);
+                card.appendChild(status);
+                achievementsContainer.appendChild(card);
+            }
+        }
+        
+        // --- Tab System ---
+        function showTab(tabId) {
+            for (const key in tabs) {
+                tabs[key].classList.add('hidden');
+                tabButtons[key].classList.remove('active');
+            }
+            tabs[tabId].classList.remove('hidden');
+            tabButtons[tabId].classList.add('active');
+        }
+        
+        // --- Game Start Function ---
+        function startGame() {
+            mainMenu.classList.add('hidden');
+            gameContainer.classList.remove('hidden');
+            
+            initializeAudio();
+            createStarField(200);
+            loadGame();
+            recalculateStats();
+            updateUI();
+            
+            // Periodically save the game to prevent data loss
+            setInterval(saveGame, 30000);
+        }
+
+        // --- Event Listeners and Initial Setup ---
+
+        // Main Menu Start Button
+        startGameButton.addEventListener('click', startGame);
+
+        // Game Event Listeners
+        clickArea.addEventListener('click', handleCoreClick);
+        buyAmpBtn.addEventListener('click', () => buyUpgrade('amplifier'));
+        buyHarvesterBtn.addEventListener('click', () => buyUpgrade('harvester'));
+        buyGeneratorBtn.addEventListener('click', () => buyUpgrade('generator'));
+        buyForgeBtn.addEventListener('click', () => buyUpgrade('forge'));
+        buyHubBtn.addEventListener('click', () => buyUpgrade('hub'));
+        prestigeBtn.addEventListener('click', cosmicReset);
+        sacrificeBtn.addEventListener('click', performSacrifice);
+        saveBtn.addEventListener('click', saveGame);
+        loadBtn.addEventListener('click', loadGame);
+        fullResetBtn.addEventListener('click', fullReset);
+
+        musicToggle.addEventListener('change', () => {
+            musicEnabled = musicToggle.checked;
+            bgm.mute = !musicEnabled;
+            saveGame();
+        });
+        sfxToggle.addEventListener('change', () => {
+            sfxEnabled = sfxToggle.checked;
+            saveGame();
+        });
+        // FIX: Corrected logic for number formatting
+        formatToggle.addEventListener('change', () => {
+            fullNumberFormat = !formatToggle.checked;
+            saveGame();
+            updateUI(); 
+        });
+        confirmToggle.addEventListener('change', () => {
+            confirmResets = confirmToggle.checked;
+            saveGame();
+        });
+        animationToggle.addEventListener('change', () => {
+            animationsEnabled = animationToggle.checked;
+            saveGame();
+        });
+
+
+        tabButtons.upgrades.addEventListener('click', () => showTab('upgrades'));
+        tabButtons.achievements.addEventListener('click', () => showTab('achievements'));
+        tabButtons.sacrifice.addEventListener('click', () => showTab('sacrifice'));
+        tabButtons.settings.addEventListener('click', () => showTab('settings'));
+
+        // Game Loop
+        setInterval(() => {
+            energy += energyPerSecond;
+            checkAllAchievements();
+            updateUI();
+        }, 1000);
+
+    </script>
+</body>
+</html>
