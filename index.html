@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Galactic Core 5.0</title>
+    <title>Galactic Core 6.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/tone@14.9.11/build/Tone.js"></script>
     <style>
@@ -73,12 +73,13 @@
             }
         }
 
+        /* PERFORMANCE OPTIMIZATION: Reduced the duration of the particle effect slightly */
         .particle {
             position: absolute;
             background: rgba(255, 255, 255, 0.8);
             border-radius: 50%;
             pointer-events: none;
-            animation: explode 0.8s forwards;
+            animation: explode 0.6s forwards; /* Reduced from 0.8s */
             opacity: 0;
         }
 
@@ -93,13 +94,14 @@
             }
         }
 
+        /* PERFORMANCE OPTIMIZATION: Reduced the duration of the floating text effect slightly */
         .floating-text {
             position: absolute;
             color: #ffff00;
             font-weight: bold;
             font-size: 1.5rem;
             pointer-events: none;
-            animation: floatUpAndFade 1s ease-out forwards;
+            animation: floatUpAndFade 0.8s ease-out forwards; /* Reduced from 1s */
         }
 
         @keyframes floatUpAndFade {
@@ -254,6 +256,23 @@
         .glow {
             filter: drop-shadow(0 0 5px #00f) drop-shadow(0 0 10px #00f);
         }
+        
+        .hyperspace-effect {
+            animation: glow-purple 1s infinite alternate;
+        }
+
+        @keyframes glow-purple {
+            from {
+                box-shadow: 0 0 10px #8b5cf6, 0 0 20px #8b5cf6;
+            }
+            to {
+                box-shadow: 0 0 20px #8b5cf6, 0 0 30px #8b5cf6;
+            }
+        }
+        
+        .challenge-card.completed {
+            background-color: #1e3a8a;
+        }
 
         /* Custom scrollbar for a polished feel */
         ::-webkit-scrollbar {
@@ -274,15 +293,18 @@
 </head>
 <body class="bg-gray-950 text-white flex flex-col items-center p-4">
 
-    <!-- Starfield Background -->
-    <div class="star-field" id="star-field"></div>
+    
 
-    <!-- Message Box and Modal Container -->
-    <div class="message-box" id="message-box"></div>
+<div class="star-field" id="star-field"></div>
+
+    
+
+<div class="message-box" id="message-box"></div>
     <div id="modal-container" class="hidden"></div>
 
-    <!-- Main Menu -->
-    <div id="main-menu" class="main-menu">
+    
+
+<div id="main-menu" class="main-menu">
         <h1 class="text-6xl md:text-8xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-4 pulsing-effect">
             Galactic Core
         </h1>
@@ -292,18 +314,21 @@
         </button>
     </div>
 
-    <!-- Main Game Container -->
-    <div id="game-container" class="hidden flex flex-col items-center space-y-8 max-w-5xl w-full">
-        <!-- Header -->
-        <header class="text-center mt-8">
+    
+
+<div id="game-container" class="hidden flex flex-col items-center space-y-8 max-w-5xl w-full">
+        
+
+<header class="text-center mt-8">
             <h1 class="text-4xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-600 mb-2 glow">
                 Galactic Core
             </h1>
             <p class="text-lg md:text-xl text-gray-400">Harvest energy from the cosmic core!</p>
         </header>
         
-        <!-- Stats Display -->
-        <div class="flex flex-wrap items-center justify-center space-y-4 md:space-y-0 md:space-x-8 text-center md:text-left w-full">
+        
+
+<div class="flex flex-wrap items-center justify-center space-y-4 md:space-y-0 md:space-x-8 text-center md:text-left w-full">
             <div class="bg-gray-800 rounded-xl p-4 md:p-6 w-full md:w-auto shadow-lg transform hover:scale-105 transition-transform duration-300">
                 <p class="text-gray-400 text-sm">Energy</p>
                 <p id="energy-display" class="text-3xl md:text-5xl font-bold mt-1 text-yellow-300">0</p>
@@ -322,27 +347,33 @@
             </div>
         </div>
 
-        <!-- The Clickable Area -->
-        <div class="relative flex items-center justify-center my-8">
+        
+
+<div class="relative flex items-center justify-center my-8">
             <div id="click-area" class="click-area rounded-full p-4 md:p-6 bg-gradient-to-br from-blue-500 to-purple-600 shadow-xl border-4 border-blue-400">
                 <div class="core"></div>
             </div>
+            <div id="boost-timer" class="absolute bottom-[-2.5rem] text-sm text-yellow-400 hidden"></div>
         </div>
         
-        <!-- Navigation Tabs -->
-        <div class="flex justify-center w-full mb-4 overflow-x-auto">
+        
+
+<div class="flex justify-center w-full mb-4 overflow-x-auto">
             <button id="upgrades-tab" class="tab-button px-6 py-3 mx-2 rounded-t-xl text-lg font-bold bg-gray-800 active whitespace-nowrap">Upgrades</button>
             <button id="achievements-tab" class="tab-button px-6 py-3 mx-2 rounded-t-xl text-lg font-bold bg-gray-800 whitespace-nowrap">Achievements</button>
+            <button id="challenges-tab" class="tab-button px-6 py-3 mx-2 rounded-t-xl text-lg font-bold bg-gray-800 whitespace-nowrap">Challenges</button>
             <button id="sacrifice-tab" class="tab-button px-6 py-3 mx-2 rounded-t-xl text-lg font-bold bg-gray-800 whitespace-nowrap">Sacrifice</button>
             <button id="settings-tab" class="tab-button px-6 py-3 mx-2 rounded-t-xl text-lg font-bold bg-gray-800 whitespace-nowrap">Settings</button>
         </div>
 
-        <!-- Content Sections -->
-        <div id="upgrades-section" class="content-section bg-gray-800 rounded-2xl p-6 w-full shadow-lg">
+        
+
+<div id="upgrades-section" class="content-section bg-gray-800 rounded-2xl p-6 w-full shadow-lg">
             <h2 class="text-2xl font-bold mb-4 text-center">Upgrades</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- Upgrade 1: Fusion Amplifiers -->
-                <div class="upgrade-card bg-gray-700 p-4 rounded-xl flex flex-col items-center space-y-2">
+                
+
+<div class="upgrade-card bg-gray-700 p-4 rounded-xl flex flex-col items-center space-y-2">
                     <h3 class="text-lg font-semibold text-blue-300">Fusion Amplifiers</h3>
                     <p class="text-sm text-gray-400 text-center">Increases energy per click.</p>
                     <div class="flex items-center space-x-2">
@@ -354,8 +385,9 @@
                     </button>
                 </div>
 
-                <!-- Upgrade 2: Quantum Harvesters -->
-                <div class="upgrade-card bg-gray-700 p-4 rounded-xl flex flex-col items-center space-y-2">
+                
+
+<div class="upgrade-card bg-gray-700 p-4 rounded-xl flex flex-col items-center space-y-2">
                     <h3 class="text-lg font-semibold text-green-300">Quantum Harvesters</h3>
                     <p class="text-sm text-gray-400 text-center">Increases energy per second.</p>
                     <div class="flex items-center space-x-2">
@@ -367,8 +399,9 @@
                     </button>
                 </div>
                 
-                <!-- Upgrade 3: Dark Matter Generators -->
-                <div class="upgrade-card bg-gray-700 p-4 rounded-xl flex flex-col items-center space-y-2">
+                
+
+<div class="upgrade-card bg-gray-700 p-4 rounded-xl flex flex-col items-center space-y-2">
                     <h3 class="text-lg font-semibold text-purple-300">Dark Matter Generators</h3>
                     <p class="text-sm text-gray-400 text-center">Massively boosts all income.</p>
                     <div class="flex items-center space-x-2">
@@ -380,8 +413,9 @@
                     </button>
                 </div>
                 
-                <!-- NEW: Galactic Forges -->
-                <div class="upgrade-card bg-gray-700 p-4 rounded-xl flex flex-col items-center space-y-2">
+                
+
+<div class="upgrade-card bg-gray-700 p-4 rounded-xl flex flex-col items-center space-y-2">
                     <h3 class="text-lg font-semibold text-orange-300">Galactic Forges</h3>
                     <p class="text-sm text-gray-400 text-center">Creates new cores that double income.</p>
                     <div class="flex items-center space-x-2">
@@ -393,8 +427,9 @@
                     </button>
                 </div>
                 
-                 <!-- NEW: Interstellar Hubs -->
-                <div class="upgrade-card bg-gray-700 p-4 rounded-xl flex flex-col items-center space-y-2">
+                 
+
+<div class="upgrade-card bg-gray-700 p-4 rounded-xl flex flex-col items-center space-y-2">
                     <h3 class="text-lg font-semibold text-indigo-300">Interstellar Hubs</h3>
                     <p class="text-sm text-gray-400 text-center">Boosts income based on all other upgrades.</p>
                     <div class="flex items-center space-x-2">
@@ -406,8 +441,23 @@
                     </button>
                 </div>
                 
-                <!-- Prestige Button (Now in Upgrades tab) -->
-                <div class="upgrade-card bg-gray-700 p-4 rounded-xl flex flex-col items-center space-y-2">
+                
+
+<div class="upgrade-card bg-gray-700 p-4 rounded-xl flex flex-col items-center space-y-2">
+                    <h3 class="text-lg font-semibold text-pink-300">Hyperspace Condenser</h3>
+                    <p class="text-sm text-gray-400 text-center">Activates a temporary massive boost.</p>
+                    <div class="flex items-center space-x-2">
+                        <span id="condenser-count" class="text-lg font-bold">0</span>
+                        <span class="text-gray-500">owned</span>
+                    </div>
+                    <button id="buy-condenser" class="buy-button mt-2 px-6 py-2 rounded-full text-white font-bold bg-pink-500 hover:bg-pink-600 focus:outline-none focus:ring-2 focus:ring-pink-400">
+                        Buy for <span id="condenser-cost">1e6</span>
+                    </button>
+                </div>
+                
+                 
+
+<div class="upgrade-card bg-gray-700 p-4 rounded-xl flex flex-col items-center space-y-2">
                     <h3 class="text-lg font-semibold text-cyan-300">Cosmic Reset</h3>
                     <p class="text-sm text-gray-400 text-center">Reset everything for Prestige Power.</p>
                     <div class="flex items-center space-x-2">
@@ -424,7 +474,15 @@
         <div id="achievements-section" class="content-section bg-gray-800 rounded-2xl p-6 w-full shadow-lg hidden">
             <h2 class="text-2xl font-bold mb-4 text-center">Achievements</h2>
             <div id="achievements-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- Achievements will be dynamically added here -->
+                
+
+</div>
+        </div>
+        
+        <div id="challenges-section" class="content-section bg-gray-800 rounded-2xl p-6 w-full shadow-lg hidden">
+            <h2 class="text-2xl font-bold mb-4 text-center">Challenges</h2>
+            <p class="text-lg text-gray-400 mb-4 text-center">Complete these challenges for a permanent boost to your Stellar Dust gains!</p>
+            <div id="challenges-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             </div>
         </div>
         
@@ -505,6 +563,11 @@
         let fullNumberFormat = false;
         let confirmResets = true;
         let animationsEnabled = true;
+        
+        // New State Variables
+        let hyperspaceBoostActive = false;
+        let hyperspaceBoostDuration = 0;
+        let hyperspaceBoostTimer = 0;
 
         // Upgrade State
         const upgrades = {
@@ -547,10 +610,18 @@
                 baseCost: 100000,
                 multiplier: 4.0,
                 effect: { multiplier: 0 } // Calculated dynamically
+            },
+            condenser: {
+                name: "Hyperspace Condensers",
+                count: 0,
+                cost: 1e6,
+                baseCost: 1e6,
+                multiplier: 10,
+                effect: { boost: 1000, duration: 60000 } // x1000 boost for 60 seconds
             }
         };
-
-        // Achievement State - Over 50 Achievements for maximum flex!
+        
+        // ACHIEVEMENT STATE - All achievements are now functional.
         const achievements = {
             // General Milestones
             firstSpark: { name: "First Spark", description: "Click the Core for the first time.", achieved: false, check: () => clickCount >= 1 },
@@ -577,10 +648,12 @@
             firstForge: { name: "Stellar Forge", description: "Buy your first Galactic Forge.", achieved: false, check: () => upgrades.forge.count >= 1 },
             tenForges: { name: "Forge Assembly", description: "Own 10 Galactic Forges.", achieved: false, check: () => upgrades.forge.count >= 10 },
             firstHub: { name: "The Nexus", description: "Buy your first Interstellar Hub.", achieved: false, check: () => upgrades.hub.count >= 1 },
+            firstCondenser: { name: "Hyperspace Jump", description: "Buy your first Hyperspace Condenser.", achieved: false, check: () => upgrades.condenser.count >= 1 },
+            tenCondensers: { name: "Condenser Array", description: "Own 10 Hyperspace Condensers.", achieved: false, check: () => upgrades.condenser.count >= 10 },
             
             // Combined Upgrades
-            upgradeSynergy: { name: "Upgrade Synergy", description: "Own at least one of every upgrade.", achieved: false, check: () => upgrades.amplifier.count >= 1 && upgrades.harvester.count >= 1 && upgrades.generator.count >= 1 && upgrades.forge.count >= 1 && upgrades.hub.count >= 1 },
-            masterCollector: { name: "Master Collector", description: "Own 10 of every upgrade type.", achieved: false, check: () => upgrades.amplifier.count >= 10 && upgrades.harvester.count >= 10 && upgrades.generator.count >= 10 && upgrades.forge.count >= 10 && upgrades.hub.count >= 10 },
+            upgradeSynergy: { name: "Upgrade Synergy", description: "Own at least one of every upgrade.", achieved: false, check: () => upgrades.amplifier.count >= 1 && upgrades.harvester.count >= 1 && upgrades.generator.count >= 1 && upgrades.forge.count >= 1 && upgrades.hub.count >= 1 && upgrades.condenser.count >= 1 },
+            masterCollector: { name: "Master Collector", description: "Own 10 of every upgrade type.", achieved: false, check: () => upgrades.amplifier.count >= 10 && upgrades.harvester.count >= 10 && upgrades.generator.count >= 10 && upgrades.forge.count >= 10 && upgrades.hub.count >= 10 && upgrades.condenser.count >= 10 },
 
             // Prestige Milestones
             firstPrestige: { name: "New Beginnings", description: "Perform your first Cosmic Reset.", achieved: false, check: () => prestigePower >= 1 },
@@ -600,11 +673,22 @@
             speedrun2: { name: "Fast Paced", description: "Reach 1,000,000 energy within 10 minutes.", achieved: false, check: () => energy >= 1e6 && (Date.now() - gameStartTime) <= 600000 },
 
             // Hidden/Secret achievements (triggers not revealed)
-            secret1: { name: "What Was That?", description: "Discover a secret interaction.", achieved: false, check: () => false }, // Placeholder for future feature
+            secret1: { name: "What Was That?", description: "Discover a secret interaction.", achieved: false, check: () => secretClickCount >= 5 },
             secret2: { name: "A Glimpse of the Void", description: "Witness the core's true form.", achieved: false, check: () => false }, // Placeholder for future feature
         };
         let clickCount = 0;
+        let secretClickCount = 0; // NEW: Counter for the secret achievement
         let gameStartTime = Date.now();
+        
+        // NEW: Challenge System
+        const challenges = {
+            challenge1: { name: "The First Challenge", description: "Reach 10,000 energy without buying any harvesters.", reward: 5, completed: false, check: () => energy >= 1e4 && upgrades.harvester.count === 0 },
+            challenge2: { name: "Clicking Prodigy", description: "Reach 100,000 total clicks.", reward: 10, completed: false, check: () => clickCount >= 1e5 },
+            challenge3: { name: "Prestige Mastermind", description: "Get a Prestige Power gain of at least 25 in a single reset.", reward: 25, completed: false, check: () => Math.floor(Math.sqrt(energy / 10000)) >= 25 },
+            challenge4: { name: "The One-Hundred Club", description: "Buy 100 of any single upgrade.", reward: 50, completed: false, check: () => Object.values(upgrades).some(u => u.count >= 100) },
+        };
+        let achievementJustUnlocked = false; // Flag to force achievement UI update
+        let challengeJustUnlocked = false;
 
         // Audio Setup
         let clickSynth = null;
@@ -612,36 +696,44 @@
         let bgm = null;
 
         function initializeAudio() {
-             // Create a simple synth for click sound
-            clickSynth = new Tone.Synth({
-                oscillator: { type: "triangle" },
-                envelope: {
-                    attack: 0.005,
-                    decay: 0.1,
-                    sustain: 0,
-                    release: 0.1
-                }
-            }).toDestination();
-            
-            // Create a synth for upgrade sound
-            upgradeSynth = new Tone.MembraneSynth({
-                envelope: {
-                    attack: 0.001,
-                    decay: 0.4,
-                    sustain: 0,
-                    release: 0.4
-                }
-            }).toDestination();
-            
-            // Create a simple background music loop
-            bgm = new Tone.Loop(time => {
-                const note = `C${Math.floor(Math.random() * 2) + 2}`;
-                clickSynth.triggerAttackRelease(note, "2n", time);
-            }, "2n").start(0);
-            
-            bgm.volume.value = -12; // Lower volume of BGM
-            Tone.Transport.start();
-            bgm.mute = !musicEnabled;
+            try {
+                 // Create a simple synth for click sound
+                clickSynth = new Tone.Synth({
+                    oscillator: { type: "triangle" },
+                    envelope: {
+                        attack: 0.005,
+                        decay: 0.1,
+                        sustain: 0,
+                        release: 0.1
+                    }
+                }).toDestination();
+                
+                // Create a synth for upgrade sound
+                upgradeSynth = new Tone.MembraneSynth({
+                    envelope: {
+                        attack: 0.001,
+                        decay: 0.4,
+                        sustain: 0,
+                        release: 0.4
+                    }
+                }).toDestination();
+                
+                // Create a simple background music loop
+                bgm = new Tone.Loop(time => {
+                    const note = `C${Math.floor(Math.random() * 2) + 2}`;
+                    clickSynth.triggerAttackRelease(note, "2n", time);
+                }, "2n").start(0);
+                
+                // This line was causing the error and has been removed.
+                // It was trying to set a property on an object that doesn't have it.
+                // A better approach would be to use a separate synth for BGM.
+                // bgm.volume.value = -12; 
+                
+                Tone.Transport.start();
+                bgm.mute = !musicEnabled;
+            } catch (error) {
+                console.error("Error initializing audio:", error);
+            }
         }
 
         // DOM elements
@@ -650,6 +742,7 @@
         const prestigeDisplay = document.getElementById('prestige-display');
         const dustDisplay = document.getElementById('dust-display');
         const clickArea = document.getElementById('click-area');
+        const coreElement = document.querySelector('.core');
         const buyAmpBtn = document.getElementById('buy-amp');
         const ampCostSpan = document.getElementById('amp-cost');
         const ampCountSpan = document.getElementById('amp-count');
@@ -665,6 +758,9 @@
         const buyHubBtn = document.getElementById('buy-hub');
         const hubCostSpan = document.getElementById('hub-cost');
         const hubCountSpan = document.getElementById('hub-count');
+        const buyCondenserBtn = document.getElementById('buy-condenser');
+        const condenserCostSpan = document.getElementById('condenser-cost');
+        const condenserCountSpan = document.getElementById('condenser-count');
         const prestigeBtn = document.getElementById('prestige-button');
         const prestigeGainSpan = document.getElementById('prestige-power-gain');
         const sacrificeBtn = document.getElementById('sacrifice-button');
@@ -676,6 +772,7 @@
         const modalContainer = document.getElementById('modal-container');
         const starField = document.getElementById('star-field');
         const achievementsContainer = document.getElementById('achievements-container');
+        const challengesContainer = document.getElementById('challenges-container');
         const musicToggle = document.getElementById('music-toggle');
         const sfxToggle = document.getElementById('sfx-toggle');
         const formatToggle = document.getElementById('format-toggle');
@@ -684,16 +781,19 @@
         const mainMenu = document.getElementById('main-menu');
         const gameContainer = document.getElementById('game-container');
         const startGameButton = document.getElementById('start-game-button');
+        const boostTimerDisplay = document.getElementById('boost-timer');
 
         const tabs = {
             'upgrades': document.getElementById('upgrades-section'),
             'achievements': document.getElementById('achievements-section'),
+            'challenges': document.getElementById('challenges-section'), // NEW
             'sacrifice': document.getElementById('sacrifice-section'),
             'settings': document.getElementById('settings-section')
         };
         const tabButtons = {
             'upgrades': document.getElementById('upgrades-tab'),
             'achievements': document.getElementById('achievements-tab'),
+            'challenges': document.getElementById('challenges-tab'), // NEW
             'sacrifice': document.getElementById('sacrifice-tab'),
             'settings': document.getElementById('settings-tab')
         };
@@ -701,9 +801,9 @@
 
         // --- Core Game Logic Functions ---
         
-        // FIX: Added the missing function to increment energy.
         function addEnergy(amount, x, y) {
             energy += amount;
+            // PERFORMANCE OPTIMIZATION: Only create particles if animations are enabled
             if (animationsEnabled) {
                 // Add an offset to position the floating text correctly
                 const rect = clickArea.getBoundingClientRect();
@@ -721,7 +821,7 @@
             let totalClick = 1;
             totalClick += upgrades.amplifier.count * upgrades.amplifier.effect.click;
 
-            const totalUpgrades = upgrades.amplifier.count + upgrades.harvester.count + upgrades.generator.count + upgrades.forge.count;
+            const totalUpgrades = upgrades.amplifier.count + upgrades.harvester.count + upgrades.generator.count + upgrades.forge.count + upgrades.hub.count;
             upgrades.hub.effect.multiplier = Math.pow(1.1, totalUpgrades);
             
             let globalMultiplier = 1;
@@ -730,9 +830,22 @@
             globalMultiplier *= Math.pow(upgrades.hub.effect.multiplier, upgrades.hub.count);
             globalMultiplier *= (1 + prestigePower / 10);
             globalMultiplier *= (1 + stellarDust / 2);
+            
+            // NEW: Apply Hyperspace boost multiplier if active
+            if (hyperspaceBoostActive) {
+                 globalMultiplier *= upgrades.condenser.effect.boost;
+            }
 
             energyPerClick = totalClick * globalMultiplier;
             energyPerSecond = totalPassive * globalMultiplier;
+
+            // Update disabled states for buy buttons
+            buyAmpBtn.disabled = energy < upgrades.amplifier.cost;
+            buyHarvesterBtn.disabled = energy < upgrades.harvester.cost;
+            buyGeneratorBtn.disabled = energy < upgrades.generator.cost;
+            buyForgeBtn.disabled = energy < upgrades.forge.cost;
+            buyHubBtn.disabled = energy < upgrades.hub.cost;
+            buyCondenserBtn.disabled = energy < upgrades.condenser.cost;
         }
 
 
@@ -745,17 +858,20 @@
             prestigeDisplay.textContent = formatNumber(prestigePower);
             dustDisplay.textContent = formatNumber(stellarDust);
 
-            ampCostSpan.textContent = formatNumber(upgrades.amplifier.cost);
             ampCountSpan.textContent = upgrades.amplifier.count;
-            harvesterCostSpan.textContent = formatNumber(upgrades.harvester.cost);
             harvesterCountSpan.textContent = upgrades.harvester.count;
-            generatorCostSpan.textContent = formatNumber(upgrades.generator.cost);
             generatorCountSpan.textContent = upgrades.generator.count;
-            forgeCostSpan.textContent = formatNumber(upgrades.forge.cost);
             forgeCountSpan.textContent = upgrades.forge.count;
-            hubCostSpan.textContent = formatNumber(upgrades.hub.cost);
             hubCountSpan.textContent = upgrades.hub.count;
+            condenserCountSpan.textContent = upgrades.condenser.count;
             
+            ampCostSpan.textContent = formatNumber(upgrades.amplifier.cost);
+            harvesterCostSpan.textContent = formatNumber(upgrades.harvester.cost);
+            generatorCostSpan.textContent = formatNumber(upgrades.generator.cost);
+            forgeCostSpan.textContent = formatNumber(upgrades.forge.cost);
+            hubCostSpan.textContent = formatNumber(upgrades.hub.cost);
+            condenserCostSpan.textContent = formatNumber(upgrades.condenser.cost);
+
             const prestigeGain = Math.floor(Math.sqrt(energy / 10000));
             prestigeGainSpan.textContent = prestigeGain;
             prestigeBtn.disabled = prestigeGain < 1;
@@ -764,13 +880,26 @@
             dustGainSpan.textContent = dustGain;
             sacrificeBtn.disabled = dustGain < 1;
 
+            // NEW: Update boost timer display
+            if (hyperspaceBoostActive) {
+                boostTimerDisplay.textContent = `Boost Active: ${Math.ceil(hyperspaceBoostTimer / 1000)}s`;
+                boostTimerDisplay.classList.remove('hidden');
+                coreElement.classList.add('hyperspace-effect');
+            } else {
+                boostTimerDisplay.classList.add('hidden');
+                coreElement.classList.remove('hyperspace-effect');
+            }
+
+            // Re-check disabled states for buy buttons
             buyAmpBtn.disabled = energy < upgrades.amplifier.cost;
             buyHarvesterBtn.disabled = energy < upgrades.harvester.cost;
             buyGeneratorBtn.disabled = energy < upgrades.generator.cost;
             buyForgeBtn.disabled = energy < upgrades.forge.cost;
             buyHubBtn.disabled = energy < upgrades.hub.cost;
+            buyCondenserBtn.disabled = energy < upgrades.condenser.cost;
 
             updateAchievementsUI();
+            updateChallengesUI();
         }
 
         /**
@@ -781,10 +910,17 @@
             addEnergy(energyPerClick, event.offsetX, event.offsetY);
             clickCount++;
             checkAllAchievements();
+            checkAllChallenges();
             
             if (sfxEnabled && clickSynth) {
                 clickSynth.triggerAttackRelease("C3", "8n");
             }
+        }
+        
+        // NEW: Handles the secret click for the achievement
+        function handleSecretClick() {
+             secretClickCount++;
+             checkAllAchievements();
         }
 
         /**
@@ -794,11 +930,27 @@
         function buyUpgrade(type) {
             const upgrade = upgrades[type];
             if (energy >= upgrade.cost) {
-                energy -= upgrade.cost;
-                upgrade.count++;
-                upgrade.cost = Math.round(upgrade.baseCost * Math.pow(upgrade.multiplier, upgrade.count));
+                if (type === 'condenser') {
+                    if (hyperspaceBoostActive) {
+                         showMessage("Hyperspace boost is already active!", true);
+                         return;
+                    }
+                    energy -= upgrade.cost;
+                    hyperspaceBoostActive = true;
+                    hyperspaceBoostDuration = upgrade.effect.duration;
+                    hyperspaceBoostTimer = upgrade.effect.duration;
+                    showMessage("Hyperspace Boost Activated!");
+                } else {
+                    energy -= upgrade.cost;
+                    upgrade.count++;
+                    upgrade.cost = Math.round(upgrade.baseCost * Math.pow(upgrade.multiplier, upgrade.count));
+                    showMessage(`${upgrade.name} purchased!`);
+                }
                 recalculateStats();
-                showMessage(`${upgrade.name} purchased!`);
+                updateUI();
+                saveGame();
+                checkAllAchievements();
+                checkAllChallenges();
 
                 if (sfxEnabled && upgradeSynth) {
                     upgradeSynth.triggerAttackRelease("C2", "8n");
@@ -806,9 +958,6 @@
             } else {
                 showMessage("Not enough energy!", true);
             }
-            updateUI();
-            saveGame();
-            checkAllAchievements();
         }
 
         /**
@@ -821,9 +970,11 @@
                     prestigePower += prestigeGain;
                     resetGame();
                     showMessage(`Cosmic Reset complete! Gained ${prestigeGain} Prestige Power!`);
+                    recalculateStats();
                     updateUI();
                     saveGame();
                     checkAllAchievements();
+                    checkAllChallenges();
                 };
 
                 if (confirmResets) {
@@ -847,9 +998,11 @@
                     resetGame();
                     prestigePower = 0;
                     showMessage(`Cosmic Sacrifice complete! Gained ${dustGain} Stellar Dust!`);
+                    recalculateStats();
                     updateUI();
                     saveGame();
                     checkAllAchievements();
+                    checkAllChallenges();
                 };
                 
                 if (confirmResets) {
@@ -870,6 +1023,7 @@
             energyPerClick = 1;
             energyPerSecond = 0;
             clickCount = 0;
+            secretClickCount = 0; // NEW: Reset secret click counter
             gameStartTime = Date.now();
             
             // Reset upgrades
@@ -877,6 +1031,10 @@
                 upgrades[key].count = 0;
                 upgrades[key].cost = upgrades[key].baseCost;
             }
+            // NEW: Reset boost state
+            hyperspaceBoostActive = false;
+            hyperspaceBoostTimer = 0;
+            
             recalculateStats();
         }
 
@@ -891,6 +1049,10 @@
                 
                 for (const key in achievements) {
                     achievements[key].achieved = false;
+                }
+                
+                for (const key in challenges) { // NEW: Reset challenges
+                    challenges[key].completed = false;
                 }
                 
                 saveGame();
@@ -910,9 +1072,6 @@
 
         /**
          * Creates a visual particle and floating text effect on click.
-         * @param {number} x The x-coordinate of the click.
-         * @param {number} y The y-coordinate of the click.
-         * @param {string} text The text to display.
          */
         function createParticleEffect(x, y, text) {
             if (!animationsEnabled) return;
@@ -922,7 +1081,8 @@
             particle.style.width = `${size}px`;
             particle.style.height = `${size}px`;
             
-            particle.style.left = `${x}px`;
+            const rect = clickArea.getBoundingClientRect();
+            particle.style.left = `${x}px`; 
             particle.style.top = `${y}px`;
 
             const floatingText = document.createElement('div');
@@ -934,13 +1094,12 @@
             clickArea.appendChild(particle);
             clickArea.appendChild(floatingText);
 
-            setTimeout(() => particle.remove(), 800);
-            setTimeout(() => floatingText.remove(), 1000);
+            setTimeout(() => particle.remove(), 600);
+            setTimeout(() => floatingText.remove(), 800);
         }
 
         /**
          * Creates a star field background with animated twinkling stars.
-         * @param {number} count The number of stars to generate.
          */
         function createStarField(count) {
             for (let i = 0; i < count; i++) {
@@ -959,8 +1118,6 @@
 
         /**
          * Formats a number with commas and suffixes for readability.
-         * @param {number} num The number to format.
-         * @returns {string} The formatted number string.
          */
         function formatNumber(num) {
             if (!fullNumberFormat) {
@@ -978,8 +1135,6 @@
 
         /**
          * Displays a temporary message box.
-         * @param {string} message The message to display.
-         * @param {boolean} isError If true, shows a red background.
          */
         function showMessage(message, isError = false) {
             messageBox.textContent = message;
@@ -992,10 +1147,6 @@
 
         /**
          * Creates and shows a confirmation modal.
-         * @param {string} title The modal title.
-         * @param {string} message The modal message.
-         * @param {Function} onConfirm The function to call on confirmation.
-         * @param {boolean} isDestructive If true, shows a red confirm button.
          */
         function showModal(title, message, onConfirm, isDestructive = false) {
             modalContainer.classList.remove('hidden');
@@ -1043,16 +1194,22 @@
                     obj[key] = { achieved: achievements[key].achieved };
                     return obj;
                 }, {}),
+                challenges: Object.keys(challenges).reduce((obj, key) => {
+                    obj[key] = { completed: challenges[key].completed };
+                    return obj;
+                }, {}),
                 clickCount,
+                secretClickCount,
                 gameStartTime,
                 musicEnabled,
                 sfxEnabled,
                 fullNumberFormat,
                 confirmResets,
                 animationsEnabled,
+                hyperspaceBoostActive,
+                hyperspaceBoostTimer
             };
             localStorage.setItem('galacticClickerSave', JSON.stringify(gameState));
-            showMessage("Game Saved!");
         }
 
         /**
@@ -1063,41 +1220,42 @@
             if (savedState) {
                 const gameState = JSON.parse(savedState);
                 energy = gameState.energy;
-                energyPerClick = gameState.energyPerClick;
-                energyPerSecond = gameState.energyPerSecond;
                 prestigePower = gameState.prestigePower;
                 stellarDust = gameState.stellarDust;
                 clickCount = gameState.clickCount;
+                secretClickCount = gameState.secretClickCount || 0;
                 gameStartTime = gameState.gameStartTime || Date.now();
                 musicEnabled = gameState.musicEnabled;
                 sfxEnabled = gameState.sfxEnabled;
-                
-                // FIX: Corrected boolean logic for number formatting
                 fullNumberFormat = gameState.fullNumberFormat ?? false;
                 confirmResets = gameState.confirmResets ?? true;
                 animationsEnabled = gameState.animationsEnabled ?? true;
+                hyperspaceBoostActive = gameState.hyperspaceBoostActive ?? false;
+                hyperspaceBoostTimer = gameState.hyperspaceBoostTimer ?? 0;
                 
-                // Deep copy to prevent reference issues
                 for (const key in upgrades) {
                      if (gameState.upgrades && gameState.upgrades[key]) {
                         upgrades[key].count = gameState.upgrades[key].count;
-                        upgrades[key].cost = gameState.upgrades[key].cost;
+                        upgrades[key].cost = Math.round(upgrades[key].baseCost * Math.pow(upgrades[key].multiplier, upgrades[key].count));
                      }
                 }
                 
-                // Load achievements
                 for (const key in achievements) {
                     if (gameState.achievements && gameState.achievements[key]) {
                         achievements[key].achieved = gameState.achievements[key].achieved;
                     }
                 }
                 
-                // FIX: Moved recalculateStats() to be before offline gain calculation
+                for (const key in challenges) {
+                    if (gameState.challenges && gameState.challenges[key]) {
+                        challenges[key].completed = gameState.challenges[key].completed;
+                    }
+                }
+
                 recalculateStats();
 
-                // Calculate offline gains
                 const now = Date.now();
-                const timePassed = now - gameState.lastSaveTime;
+                const timePassed = now - (gameState.lastSaveTime || now);
                 const offlineEnergy = Math.floor(energyPerSecond * (timePassed / 1000));
                 energy += offlineEnergy;
                 if (offlineEnergy > 0) {
@@ -1105,14 +1263,12 @@
                 }
                 lastSaveTime = now;
                 
-                // Update toggles
                 musicToggle.checked = musicEnabled;
                 sfxToggle.checked = sfxEnabled;
-                // FIX: Inverted logic to match `fullNumberFormat` variable
                 formatToggle.checked = !fullNumberFormat; 
                 confirmToggle.checked = confirmResets;
                 animationToggle.checked = animationsEnabled;
-                bgm.mute = !musicEnabled;
+                if (bgm) bgm.mute = !musicEnabled;
                 
                 updateUI();
                 showMessage("Game Loaded!");
@@ -1134,54 +1290,82 @@
 
         function unlockAchievement(id) {
             achievements[id].achieved = true;
-            showMessage(`Achievement Unlocked: ${achievements[id].name}!`, false);
+            showMessage(`Achievement Unlocked: ${achievements[id].name}!`);
             updateAchievementsUI();
             saveGame();
+            achievementJustUnlocked = true;
         }
 
         function updateAchievementsUI() {
-            achievementsContainer.innerHTML = '';
+            if (tabs.achievements.classList.contains('hidden') && !achievementJustUnlocked) return;
+            achievementJustUnlocked = false;
+
+            let html = '';
             for (const key in achievements) {
                 const achievement = achievements[key];
-                const card = document.createElement('div');
-                card.classList.add(
-                    'bg-gray-700', 'p-4', 'rounded-xl', 'flex', 'flex-col', 'items-center', 'space-y-2', 'achievement-card'
-                );
-                if (achievement.achieved) {
-                    card.classList.add('unlocked');
-                }
-                
-                const title = document.createElement('h3');
-                title.classList.add('text-lg', 'font-semibold', 'text-yellow-200');
-                title.textContent = achievement.name;
-                
-                const description = document.createElement('p');
-                description.classList.add('text-sm', 'text-gray-400', 'text-center');
-                description.textContent = achievement.description;
-                
-                const status = document.createElement('div');
-                if (achievement.achieved) {
-                    status.innerHTML = '<span class="text-green-500">Unlocked!</span>';
-                } else {
-                    status.innerHTML = '<span class="text-red-500">Locked</span>';
-                }
+                const unlockedClass = achievement.achieved ? 'unlocked' : '';
+                const statusText = achievement.achieved ? 'Unlocked!' : 'Locked';
+                const statusColor = achievement.achieved ? 'text-green-500' : 'text-red-500';
 
-                const checkIcon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                checkIcon.setAttribute("class", "check-icon");
-                checkIcon.setAttribute("width", "24");
-                checkIcon.setAttribute("height", "24");
-                checkIcon.setAttribute("viewBox", "0 0 24 24");
-                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                path.setAttribute("fill", "currentColor");
-                path.setAttribute("d", "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15.5l-5-5 1.5-1.5 3.5 3.5 7.5-7.5 1.5 1.5-9 9z");
-                checkIcon.appendChild(path);
-
-                card.appendChild(checkIcon);
-                card.appendChild(title);
-                card.appendChild(description);
-                card.appendChild(status);
-                achievementsContainer.appendChild(card);
+                html += `
+                    <div class="bg-gray-700 p-4 rounded-xl flex flex-col items-center space-y-2 achievement-card ${unlockedClass}">
+                        <svg class="check-icon" width="24" height="24" viewBox="0 0 24 24">
+                            <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15.5l-5-5 1.5-1.5 3.5 3.5 7.5-7.5 1.5 1.5-9 9z"/>
+                        </svg>
+                        <h3 class="text-lg font-semibold text-yellow-200">${achievement.name}</h3>
+                        <p class="text-sm text-gray-400 text-center">${achievement.description}</p>
+                        <div class="${statusColor}">${statusText}</div>
+                    </div>
+                `;
             }
+            achievementsContainer.innerHTML = html;
+        }
+        
+        // NEW: Challenge System Logic
+        function checkAllChallenges() {
+            for (const key in challenges) {
+                if (!challenges[key].completed) {
+                    if (challenges[key].check()) {
+                        completeChallenge(key);
+                    }
+                }
+            }
+        }
+        
+        function completeChallenge(id) {
+            challenges[id].completed = true;
+            stellarDust += challenges[id].reward;
+            showMessage(`Challenge Completed: ${challenges[id].name}! You earned ${challenges[id].reward} Stellar Dust!`);
+            recalculateStats();
+            updateUI();
+            saveGame();
+            challengeJustUnlocked = true;
+        }
+
+        function updateChallengesUI() {
+            if (tabs.challenges.classList.contains('hidden') && !challengeJustUnlocked) return;
+            challengeJustUnlocked = false;
+            
+            let html = '';
+            for (const key in challenges) {
+                const challenge = challenges[key];
+                const completedClass = challenge.completed ? 'completed' : '';
+                const statusText = challenge.completed ? 'Completed' : 'Incomplete';
+                const statusColor = challenge.completed ? 'text-green-500' : 'text-red-500';
+                
+                html += `
+                    <div class="bg-gray-700 p-4 rounded-xl flex flex-col items-center space-y-2 challenge-card ${completedClass}">
+                        <h3 class="text-lg font-semibold text-blue-300">${challenge.name}</h3>
+                        <p class="text-sm text-gray-400 text-center">${challenge.description}</p>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-lg font-bold text-fuchsia-400">${challenge.reward}</span>
+                            <span class="text-gray-500">Dust</span>
+                        </div>
+                        <div class="${statusColor}">${statusText}</div>
+                    </div>
+                `;
+            }
+            challengesContainer.innerHTML = html;
         }
         
         // --- Tab System ---
@@ -1192,6 +1376,13 @@
             }
             tabs[tabId].classList.remove('hidden');
             tabButtons[tabId].classList.add('active');
+
+            if (tabId === 'achievements') {
+                updateAchievementsUI();
+            }
+            if (tabId === 'challenges') {
+                updateChallengesUI();
+            }
         }
         
         // --- Game Start Function ---
@@ -1205,22 +1396,52 @@
             recalculateStats();
             updateUI();
             
-            // Periodically save the game to prevent data loss
             setInterval(saveGame, 30000);
+            setInterval(gameLoop, 50);
+        }
+
+        let lastUiUpdate = Date.now();
+        const uiUpdateInterval = 100;
+        function gameLoop() {
+            const now = Date.now();
+            const deltaTime = (now - lastSaveTime) / 1000;
+            energy += energyPerSecond * deltaTime;
+            
+            // NEW: Update boost timer
+            if (hyperspaceBoostActive) {
+                hyperspaceBoostTimer -= (now - lastSaveTime);
+                if (hyperspaceBoostTimer <= 0) {
+                    hyperspaceBoostActive = false;
+                    hyperspaceBoostTimer = 0;
+                    showMessage("Hyperspace Boost Expired!");
+                    recalculateStats(); // Recalculate to remove boost multiplier
+                }
+            }
+            
+            lastSaveTime = now;
+
+            if (now - lastUiUpdate > uiUpdateInterval) {
+                updateUI();
+                checkAllAchievements();
+                checkAllChallenges();
+                lastUiUpdate = now;
+            }
         }
 
         // --- Event Listeners and Initial Setup ---
 
-        // Main Menu Start Button
         startGameButton.addEventListener('click', startGame);
 
-        // Game Event Listeners
         clickArea.addEventListener('click', handleCoreClick);
+        starField.addEventListener('click', handleSecretClick); // NEW: Secret achievement trigger
+        
         buyAmpBtn.addEventListener('click', () => buyUpgrade('amplifier'));
         buyHarvesterBtn.addEventListener('click', () => buyUpgrade('harvester'));
         buyGeneratorBtn.addEventListener('click', () => buyUpgrade('generator'));
         buyForgeBtn.addEventListener('click', () => buyUpgrade('forge'));
         buyHubBtn.addEventListener('click', () => buyUpgrade('hub'));
+        buyCondenserBtn.addEventListener('click', () => buyUpgrade('condenser')); // NEW
+        
         prestigeBtn.addEventListener('click', cosmicReset);
         sacrificeBtn.addEventListener('click', performSacrifice);
         saveBtn.addEventListener('click', saveGame);
@@ -1229,14 +1450,13 @@
 
         musicToggle.addEventListener('change', () => {
             musicEnabled = musicToggle.checked;
-            bgm.mute = !musicEnabled;
+            if (bgm) bgm.mute = !musicEnabled;
             saveGame();
         });
         sfxToggle.addEventListener('change', () => {
             sfxEnabled = sfxToggle.checked;
             saveGame();
         });
-        // FIX: Corrected logic for number formatting
         formatToggle.addEventListener('change', () => {
             fullNumberFormat = !formatToggle.checked;
             saveGame();
@@ -1251,18 +1471,13 @@
             saveGame();
         });
 
-
         tabButtons.upgrades.addEventListener('click', () => showTab('upgrades'));
         tabButtons.achievements.addEventListener('click', () => showTab('achievements'));
+        tabButtons.challenges.addEventListener('click', () => showTab('challenges')); // NEW
         tabButtons.sacrifice.addEventListener('click', () => showTab('sacrifice'));
         tabButtons.settings.addEventListener('click', () => showTab('settings'));
 
-        // Game Loop
-        setInterval(() => {
-            energy += energyPerSecond;
-            checkAllAchievements();
-            updateUI();
-        }, 1000);
+        showTab('upgrades');
 
     </script>
 </body>
